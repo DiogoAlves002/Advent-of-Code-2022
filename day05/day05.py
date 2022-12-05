@@ -1,3 +1,4 @@
+import copy
 
 def read_data():
     with open('day05/input.txt') as f:
@@ -51,17 +52,29 @@ def move(list_A, list_B, times):
     return list_A, list_B
 
 
+def move_multiple(list_A, list_B, quantity):
+    crates= list_A[-quantity:]
+    list_A= list_A[:-quantity]
+    list_B= list_B + crates
+    return list_A, list_B
+
+
 
 
 def do_moves(setup_in_dic, moves):
+    setup_in_dic_copy= copy.deepcopy(setup_in_dic)
+
     for m in moves:
         splited= m.split(" ", 5)
         times= int(splited[1])
         list_A= splited[3]
         list_B= splited[5]
         
-        setup_in_dic[list_A], setup_in_dic[list_B]= move(setup_in_dic[list_A], setup_in_dic[list_B], times)
-    return setup_in_dic
+        setup_in_dic[list_A], setup_in_dic[list_B]= move(setup_in_dic[list_A], setup_in_dic[list_B], times) # challenge 1
+        
+        setup_in_dic_copy[list_A], setup_in_dic_copy[list_B]= move_multiple(setup_in_dic_copy[list_A], setup_in_dic_copy[list_B], times) # challenge 2
+
+    return setup_in_dic, setup_in_dic_copy
 
 
 
@@ -83,13 +96,14 @@ def main():
 
     setup_in_dic= store_setup(setup)
 
-    final_setup= do_moves(setup_in_dic, moves)
+    final_setup, final_setup_2= do_moves(setup_in_dic, moves)
 
     top= get_top(final_setup)
+    top_2= get_top(final_setup_2)
 
     print("challenge 1: ", top)
+    print("challenge 2: ", top_2)
 
-    
 
 
 
