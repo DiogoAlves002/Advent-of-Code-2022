@@ -31,7 +31,6 @@ def store_setup(setup):
         dic[i]= []
 
     for row in setup[1:]:
-        print(row)
         for i in index:
             box= row[1]
             row= row[3:]
@@ -58,11 +57,20 @@ def do_moves(setup_in_dic, moves):
     for m in moves:
         splited= m.split(" ", 5)
         times= int(splited[1])
-        list_A= int(splited[3])
-        list_B= int(splited[5])
+        list_A= splited[3]
+        list_B= splited[5]
+        
+        setup_in_dic[list_A], setup_in_dic[list_B]= move(setup_in_dic[list_A], setup_in_dic[list_B], times)
+    return setup_in_dic
 
-        # TODO do moves
 
+
+def get_top(setup):
+    result= ""
+    for i in setup.values():
+        result+= i.pop()
+
+    return result
 
 
 
@@ -72,16 +80,16 @@ def do_moves(setup_in_dic, moves):
 def main():
     setup, moves= read_data()
 
-    print(setup)
-    print(moves)
-
 
     setup_in_dic= store_setup(setup)
 
-    do_moves(setup_in_dic, moves)
+    final_setup= do_moves(setup_in_dic, moves)
 
+    top= get_top(final_setup)
 
+    print("challenge 1: ", top)
 
+    
 
 
 
