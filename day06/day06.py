@@ -7,26 +7,30 @@ def read_data():
     return data
 
 
-def get_marker(data):
-    for idx in range(len(data) - 4):
-        cut = data[idx:idx+4]
-        
+
+
+def get_marker(data, type):
+    if type== "message":
+        amout= 14
+    else:
+        amout= 4
+    for idx in range(len(data) - amout):
+        cut = data[idx:idx+amout]
         
         if any(cut.count(c) > 1 for c in cut):
             continue
-        return idx + 4
-
-
+        return idx + amout
 
 
 
 def main():
     data= read_data()
 
-    index= get_marker(data)
+    index= get_marker(data, "default")
+    index_2= get_marker(data, "message")
 
     print("challenge 1: ", index)
-    #print("challenge 2: ", top_2)
+    print("challenge 2: ", index_2)
 
 
 
