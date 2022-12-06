@@ -11,15 +11,15 @@ def read_data():
 
 def get_marker(data, type):
     if type== "message":
-        amout= 14
+        amount= 14
     else:
-        amout= 4
-    for idx in range(len(data) - amout):
-        cut = data[idx:idx+amout]
+        amount= 4
+    for idx in range(len(data) - amount):
+        cut = data[idx:idx+amount]
         
         if any(cut.count(c) > 1 for c in cut):
             continue
-        return idx + amout
+        return idx + amount
 
 
 
