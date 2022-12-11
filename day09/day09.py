@@ -16,79 +16,85 @@ def sequenceOfMoves(data):
     return moves
 
 
-def distance(tail, head):
-    return abs(tail[0] - head[0]) + abs(tail[1] - head[1])
+def touching(tail, head):
+    spaces_around_head= [(head[0]-1, head[1]), (head[0]+1, head[1]), (head[0], head[1]-1), (head[0], head[1]+1)]
+    corners_around_head= [(head[0]-1, head[1]-1), (head[0]+1, head[1]-1), (head[0]-1, head[1]+1), (head[0]+1, head[1]+1)]
 
-def diagonal(tail, head):
-    if tail[0] == head[0] or tail[1] == head[1] or distance(tail, head) > 2:
-        return False
-    else:
-        return True
+    return tail in spaces_around_head or tail in corners_around_head
 
-def adjacent(tail, head):
-    if distance(tail, head) == 1:
-        return True
-    else:
-        return False
-
-
-
-def moveTail(tail, previous, head, head_direction):
-
-    # not really happy with this code, but it works
-    if tail == previous:
-        return tail
-
-    if tail[0] == previous[0] and tail[1] == previous[1]:
-        return tail
-
+def overlapping(tail, head):
+    return tail == head
     
-    if diagonal(tail, head):
-        return tail
 
-    if not diagonal(tail, previous) and diagonal(tail, head):
-        return tail
-
-    if diagonal(tail, previous) and adjacent(tail, head):
-        return tail
+def inline(tail, head):
+    return tail[0] == head[0] or tail[1] == head[1]
 
 
-
-    if head_direction == "U":
-        if tail[0] == previous[0]: # same column, head pulls it up
-            if tail[1] == previous[1]-1: # tail is one above head, so the head will just cover it
-                return tail
-            return (tail[0], tail[1]-1)
-        else: # different column, head pulls it diagonally to the same column and up
-            return (previous[0], tail[1]-1)
-
-    elif head_direction == "D":
-        if tail[0] == previous[0]:
-            if tail[1] == previous[1]+1:
-                return tail
-            return (tail[0], tail[1]+1)
+def lineDirection(tail, head):
+    if tail[0] == head[0]:
+        if tail[1] > head[1]:
+            return "up"
         else:
-            return (previous[0], tail[1]+1)
-
-    elif head_direction == "L":
-        if tail[1] == previous[1]:
-            if tail[0] == previous[0]-1:
-                return tail
-            return (tail[0]-1, tail[1])
-        else:
-            return (tail[0]-1, previous[1])
-
-    elif head_direction == "R":
-        if tail[1] == previous[1]:
-            if tail[0] == previous[0]+1:
-                return tail
-            return (tail[0]+1, tail[1])
-        else:
-            return (tail[0]+1, previous[1])
-
+            return "down"
     else:
-        print("ERROR: unknown direction: ", head_direction)
-        exit(1)
+        if tail[0] > head[0]:
+            return "left"
+        else:
+            return "right"
+
+def getCorner(tail, head):
+    """returns the corner where the head is in relation to the tail"""
+    if head[0] > tail[0]: # if head is to the right of tail
+        if head[1] < tail[1]: # if head is above tail
+            return "top right"
+        else: # if head is below tail
+            return "bottom right"
+    else: # if head is to the left of tail
+        if head[1] < tail[1]: # if head is above tail
+            return "top left"
+        else: # if head is below tail
+            return "bottom left"
+            
+
+
+def moveTail(tail, head):
+
+    if overlapping(tail, head) or touching(tail, head):
+        #print("not moved")
+        return tail
+
+    elif inline(tail, head): # if tail is inline with head
+        #print("inline")
+        if lineDirection(tail, head) == "up":
+            return (tail[0], tail[1]-1)
+        elif lineDirection(tail, head) == "down":
+            return (tail[0], tail[1]+1)
+        elif lineDirection(tail, head) == "left":
+            return (tail[0]-1, tail[1])
+        else: # if lineDirection(tail, head) == "right":
+            return (tail[0]+1, tail[1])
+
+    else: # if tail is not inline with head
+        corner= getCorner(tail, head)
+        #print("corner")
+        if corner == "top right":
+            return (tail[0]+1, tail[1]-1)
+
+        elif corner == "bottom right":
+            return (tail[0]+1, tail[1]+1)
+
+        elif corner == "top left":
+            return (tail[0]-1, tail[1]-1)
+
+        else: # if corner == "bottom left":
+            return (tail[0]-1, tail[1]+1)
+
+
+
+
+
+
+
 
 
 
@@ -143,10 +149,11 @@ def followPath(moves):
 
             elif direction == "R":
                 head= (head[0]+1, head[1])
-            tail= moveTail(tail, previous, head, direction)
+            tail= moveTail(tail, head)
             
-            #fancyGridPrint(head, tail, "small  ")
+            #fancyGridPrint(head, tail, "small")
             tail_positions.add(tail) # add tail to set of positions if it is not already there
+    #printTail(tail_positions)
     return len(tail_positions)
 
 
@@ -178,7 +185,6 @@ def followPathBigCord(moves):
     for move in moves:
         direction, distance= move
         for i in range(distance):
-            previous= tuple(cord[0]) # copy of head with another reference
             if direction == "U":
                 head= (head[0], head[1]-1)
 
@@ -190,30 +196,19 @@ def followPathBigCord(moves):
 
             elif direction == "R":
                 head= (head[0]+1, head[1])
-            print("direction: ", direction)
-            print("head: ", head)
-            cord[0]= head
-            for tail_part in range(1, 10): # move all tails
-                print("tail_part: ", tail_part)
-                tail= cord[tail_part]
-                next_previous= cord[tail_part]
-                print("tail: ", tail)
-                print("next_previous: ", next_previous)
 
-                previous_tail= cord[tail_part-1]
-                print("previous_tail: ", previous_tail)
-                print("previous: ", previous)
-                tail= moveTail(tail, previous, previous_tail, direction)
-                print("tail after moving: ", tail)
-                cord[tail_part]= tail
-                previous= tuple(next_previous)
-                print("----")
-            print("")
+            cord[0]= head # store head 
+            for tail_part in range(1, 10): # move all tails
+                tail= cord[tail_part]
+                previous_tail_after_moving= cord[tail_part-1]
+
+                tail= moveTail(tail, previous_tail_after_moving)
+                cord[tail_part]= tail # store tail part
                 
             
-            fancyGridPrint(head, cord, "big")
+            #fancyGridPrint(head, cord, "big")
             tail_positions.add(tail) # add last tail to set of positions if it is not already there
-    printTail(tail_positions)
+    #printTail(tail_positions)
 
     return len(tail_positions)
 
@@ -228,6 +223,8 @@ def followPathBigCord(moves):
 
 
 def main():
+    """uncomment fancyGridPrint to see the path of the tail, and printTail to see the tail positions"""
+
     data= read_data()
     
     moves= sequenceOfMoves(data)
