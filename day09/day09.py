@@ -111,8 +111,9 @@ def fancyGridPrint(head, tail, dimension):
             for largura in range(-11, 15):
                 if (largura, alture) == head:
                     print("H", end="")
-                elif (largura, alture) == tail:
-                    print(str(tail), end="")
+                elif (largura, alture) in tail.values():
+                    tail_part= list(tail.keys())[list(tail.values()).index((largura, alture))]
+                    print(str(tail_part), end="")
                 else:
                     print(".", end="")
             print()
@@ -158,6 +159,15 @@ def fillCordDict():
     return cord
 
 
+def printTail(tail):
+    for altura in range (-15, 6):
+        for largura in range(-11, 15):
+            if (largura, altura) in tail:
+                print("#", end="")
+            else:
+                print(".", end="")
+        print()
+    print()
 
 
 def followPathBigCord(moves):
@@ -168,35 +178,43 @@ def followPathBigCord(moves):
     for move in moves:
         direction, distance= move
         for i in range(distance):
-            direction, distance= move
-            for e in range(distance):
-                previous= tuple(cord[0]) # copy of head with another reference
-                if direction == "U":
-                    head= (head[0], head[1]-1)
+            previous= tuple(cord[0]) # copy of head with another reference
+            if direction == "U":
+                head= (head[0], head[1]-1)
 
-                elif direction == "D":
-                    head= (head[0], head[1]+1)
+            elif direction == "D":
+                head= (head[0], head[1]+1)
 
-                elif direction == "L":
-                    head= (head[0]-1, head[1])
+            elif direction == "L":
+                head= (head[0]-1, head[1])
 
-                elif direction == "R":
-                    head= (head[0]+1, head[1])
+            elif direction == "R":
+                head= (head[0]+1, head[1])
+            print("direction: ", direction)
+            print("head: ", head)
+            cord[0]= head
+            for tail_part in range(1, 10): # move all tails
+                print("tail_part: ", tail_part)
+                tail= cord[tail_part]
+                next_previous= cord[tail_part]
+                print("tail: ", tail)
+                print("next_previous: ", next_previous)
 
-                cord[0]= head
-                for tail_part in range(1, 10): # move all tails
-                    tail= cord[tail_part]
-                    next_previous= cord[tail_part]
-
-                    head= cord[tail_part-1]
-
-                    tail= moveTail(tail, previous, head, direction)
-                    cord[tail_part]= tail
-                    previous= next_previous
-                    
+                previous_tail= cord[tail_part-1]
+                print("previous_tail: ", previous_tail)
+                print("previous: ", previous)
+                tail= moveTail(tail, previous, previous_tail, direction)
+                print("tail after moving: ", tail)
+                cord[tail_part]= tail
+                previous= tuple(next_previous)
+                print("----")
+            print("")
                 
-                fancyGridPrint(head, tail_part, "big")
-                tail_positions.add(tail) # add last tail to set of positions if it is not already there
+            
+            fancyGridPrint(head, cord, "big")
+            tail_positions.add(tail) # add last tail to set of positions if it is not already there
+    printTail(tail_positions)
+
     return len(tail_positions)
 
 
