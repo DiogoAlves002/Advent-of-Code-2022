@@ -33,11 +33,31 @@ def incrementCycle(i, X):
     return i, strenght
 
 
+def sprite(X):
+    return (X-1, X, X+1)
+
+def pixel(X, i):
+    if (i-1)%40 in sprite(X):
+        return ("#", )
+    else:
+        return (".", )
+
+def updateCycle(current_cycle, cycles, X, i):
+    current_cycle += pixel(X, i)
+    if i % 40 == 0:
+        cycles.append(current_cycle)
+        current_cycle= []
+    return current_cycle, cycles
+
+
+
 def executeProgram(commands):
     X=1
     i=1
 
     signal_strenght_sum= 0
+    cycles= []
+    current_cycle= ()
 
     while commands:
 
@@ -45,28 +65,39 @@ def executeProgram(commands):
 
         if command[0] == "addx":
             for e in range(2):
+                current_cycle, cycles = updateCycle(current_cycle, cycles, X, i)
+
                 i, strenght = incrementCycle(i, X)
                 signal_strenght_sum += strenght
             X += command[1]
         elif command[0] == "noop":
+            current_cycle, cycles = updateCycle(current_cycle, cycles, X, i)
+
+
             i, strenght = incrementCycle(i, X)
             signal_strenght_sum += strenght
 
         
-    return signal_strenght_sum
+    return signal_strenght_sum, cycles
 
+
+def printCycles(cycles):
+    for cycle in cycles:
+        print("".join(cycle))
 
 
 def main():
 
     data= read_data()
     
-    signal_strenght_sum= executeProgram(data)
+    signal_strenght_sum, cycles= executeProgram(data)
+
 
 
 
     print("challenge 1: ", signal_strenght_sum)
-    #print("challenge 2: ", tail_positions_2)
+    print("challenge 2: ")
+    printCycles(cycles)
 
 
 
