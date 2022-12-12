@@ -10,7 +10,7 @@ def read_data():
             command, value= line
             value= int(value)
         else:
-            command= line
+            command= line[0]
             value= None
         commands.append((command, value))
 
@@ -20,21 +20,24 @@ def read_data():
 
 def interestingSignalStrengt(i, X):
     base= 20
-    if i == 20 or ((i-20)%40 == 0 and i < 221):
-        print("interesting signal at i: ", i, " X: ", X)
+    if i == base or ((i-base)%40 == 0 and i < 221):
+        #print("interesting signal at i: ", i, " X: ", X)
         return i*X
     else:
-        return None
+        return 0
 
+
+def incrementCycle(i, X):
+    strenght = interestingSignalStrengt(i, X)
+    i+=1
+    return i, strenght
 
 
 def executeProgram(commands):
     X=1
     i=1
 
-    command= None
-
-    signal_strenght_sum= 1
+    signal_strenght_sum= 0
 
     while commands:
 
@@ -42,21 +45,15 @@ def executeProgram(commands):
 
         if command[0] == "addx":
             for e in range(2):
-                signal_sterength= interestingSignalStrengt(i, X)
-                if signal_sterength:
-                    signal_strenght_sum += signal_sterength
-                i += 1
+                i, strenght = incrementCycle(i, X)
+                signal_strenght_sum += strenght
             X += command[1]
         elif command[0] == "noop":
-            signal_sterength= interestingSignalStrengt(i, X)
-            i += 1
+            i, strenght = incrementCycle(i, X)
+            signal_strenght_sum += strenght
 
-
-        if i == 30 :
-            break
         
     return signal_strenght_sum
-
 
 
 
