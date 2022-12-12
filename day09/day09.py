@@ -223,7 +223,8 @@ def followPathBigCord(moves):
 
 
 def main():
-    """uncomment fancyGridPrint to see the path of the tail, and printTail to see the tail positions"""
+    """uncomment fancyGridPrint to see the path of the tail, 
+    and printTail to see the positions where tail was at least once"""
 
     data= read_data()
     
