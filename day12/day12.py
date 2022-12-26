@@ -6,29 +6,50 @@ def read_data():
     return grid
 
 
-def starting_Goal_Position(grid):
+def starting_goal_Position(grid):
     start= None
     goal= None
     for y in range(len(grid)):
-        for x in range(len(grid[0])):
-            if start and goal:
-                return start, goal
+        if start and goal:
+            return start, goal
+            
+        if "S" in grid[y]:
+            start= (grid[y].index("S"), y)
 
-            elif grid[y][x] == "S":
-                start= (x, y)
-            elif grid[y][x] == "E":
-                goal= (x, y)
+        if "E" in grid[y]:
+            goal= (grid[y].index("E"), y)
+
+
+
+def all_starting_goal_positions(grid):
+    start= []
+    goal= None
+    for y in range(len(grid)):
+        if not "a" in grid[y] and not "S" in grid[y] and not "E" in grid[y]: # may speed up a bit
+            continue
+
+        # get all x coordinate of occurences of "a" and "S"
+        a_s= [x for x in range(len(grid[y])) if grid[y][x] == "a" or grid[y][x] == "S"] 
+
+        # add starting positions if there are any
+        start.extend([(x, y) for x in a_s if a_s])
+
+        # get goal position if there is any
+        goal= (grid[y].index("E"), y) if "E" in grid[y] else goal
+
+
+    return start, goal
 
 
 def printGrid(grid, current):
     print("------------------")
     for y in range(len(grid)):
-        for x in range(len(grid[0])):
-            if (x, y) == current:
-                print("☆", end="")
-            else:
-                print(grid[y][x], end="")
-        print()
+        if y != current[1]:
+            print(grid[y])
+            continue
+
+        x= current[0]
+        print(grid[y][:x] + "☆" + grid[y][x+1:])
     print("------------------")
 
 
@@ -48,21 +69,24 @@ def getDirection(current, next):
             return "<"
 
 
+def chooseChar(grid, x, y, path):
+    if (x, y) not in path:
+        return "."
+    elif grid[y][x] == "E":
+        return "E"
+    else:
+        index= path.index((x, y))
+        return getDirection(path[index], path[index+1])
+
+
 def printPath(grid, path):
-    print("##################")
+    print("")
     for y in range(len(grid)):
         for x in range(len(grid[0])):
-            if (x, y) in path:
-                index= path.index((x, y))
-                if index == len(path) - 1:
-                    print("E", end="")
-                else:
-                    direction= getDirection(path[index], path[index+1])
-                    print(direction, end="")
-            else:
-                print(".", end="")
+            direction= chooseChar(grid, x, y, path)
+            print(direction, end="")
         print()
-    print("##################")
+    print("")
 
 
 
@@ -70,33 +94,16 @@ def canMove(grid, x1, y1, x2, y2):
     """the elevation of the destination square can be at most one higher than the elevation of your current square"""
 
     if grid[y1][x1] == "S": # start has elevation "a"
-        if ord("a") + 1 >= ord(grid[y2][x2]):
-            return True
-        return False
+        return ord("a") + 1 >= ord(grid[y2][x2])
 
     if grid[y2][x2] == "E": # end has elevation "z"
-        if ord(grid[y1][x1]) + 1 >= ord("z"):
-            return True
-        return False
+        return ord(grid[y1][x1]) + 1 >= ord("z")
 
-    if ord(grid[y1][x1]) + 1 >= ord(grid[y2][x2]):
-        return True
-
-    return False
+    return ord(grid[y1][x1]) + 1 >= ord(grid[y2][x2])
 
 def neighbours(grid, current_square):
     x, y= current_square
     neighbours= []
-
-    # check left
-    if x > 0 and canMove(grid, x, y, x-1, y):
-        #print("can move left")
-        neighbours.append((x-1, y))
-
-    # check right
-    if x < len(grid[0]) - 1 and canMove(grid, x, y, x+1, y):
-        #print("can move right")
-        neighbours.append((x+1, y))
 
     # check up
     if y > 0 and canMove(grid, x, y, x, y-1):
@@ -107,6 +114,16 @@ def neighbours(grid, current_square):
     if y < len(grid) - 1 and canMove(grid, x, y, x, y+1):
         #print("can move down")
         neighbours.append((x, y+1))
+
+    # check left
+    if x > 0 and canMove(grid, x, y, x-1, y):
+        #print("can move left")
+        neighbours.append((x-1, y))
+
+    # check right
+    if x < len(grid[0]) - 1 and canMove(grid, x, y, x+1, y):
+        #print("can move right")
+        neighbours.append((x+1, y))
 
     return neighbours
 
@@ -130,6 +147,9 @@ def findPath(grid, start, goal):
                 previous[neighbour]= current
 
     path= []
+    if current != goal:
+        return None
+
     while current != start:
         path.append(current)
         current= previous[current]
@@ -139,25 +159,53 @@ def findPath(grid, start, goal):
 
     return path
 
+def findQuickestPath(grid, start, goal):
+    steps= None
+    quickest_path= None
+
+    for s in start:
+        #print("steps: ", steps)
+        path= findPath(grid, s, goal)
+        if path is None:
+            #print("no path found")
+            continue
+        if steps is None or len(path)-1 < steps:
+            quickest_path= path
+            steps= len(path) -1
+
+    return quickest_path, steps
+
+
+
+
+def challenge1(grid):
+    start, goal= starting_goal_Position(grid)
+
+    path= findPath(grid, start, goal)
+    printPath(grid, path)
+
+    steps= len(path) - 1
+    print("challenge 1: ", steps)
+
+
+def challenge2(grid):
+    starts, goal= all_starting_goal_positions(grid)
+
+    quickest_path, steps= findQuickestPath(grid, starts, goal)
+    printPath(grid, quickest_path)
+
+    print("challenge 2: ", steps)
+
+
+
 
 def main():
 
 
     grid= read_data()
 
-    start, goal= starting_Goal_Position(grid)
-
-    path= findPath(grid, start, goal)
-    
-    printPath(grid, path)
-
-    steps= len(path) - 1
-
-    print("challenge 1: ", steps)
-
-
-    #print("challenge 1: ", monkey_business)
-    #print("challenge 2: ", monkey_business_2)
+    challenge1(grid)
+    challenge2(grid)
 
 
 
