@@ -35,9 +35,7 @@ def read_data():
 
 def compare_int(left, right):
     if left == right:
-        #print("equal int", left, right)
         return -1
-    #print("not equal int", left, right)
     if left < right:
         return 1
     return 0
@@ -50,14 +48,11 @@ def compare_packets(left, right):
     left= [left] if type(left) == int else left
     right= [right] if type(right) == int else right
 
-    #print("##compare", left, right)
     for l, r in zip(left, right):
         result= compare_packets(l, r)
         if result == 1:
-            #print("smaller", left, right)
             return 1
         elif result == 0:
-            #print("greater", left, right)
             return 0
     return compare_int(len(left), len(right))
 
@@ -69,9 +64,7 @@ def challenge_1(pairs):
     i= 1
     for pair in pairs:
         left, right= pair
-        #print('\n', i)
         if compare_packets(left, right):
-            #print("--RIGHT--", i)
             sum_right_order += i
         i += 1
 
