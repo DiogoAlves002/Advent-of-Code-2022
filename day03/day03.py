@@ -1,5 +1,5 @@
 
-with open ("day03/input.txt", "r") as f:
+with open ("input.txt", "r") as f:
     data = f.read().splitlines()
 
 # a through z have priorities 1 through 26
