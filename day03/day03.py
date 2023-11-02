@@ -31,12 +31,6 @@ print("challenge 1: ", priority)
 
 
 
-
-
-
-with open ("day03/input.txt", "r") as f:
-    data = f.read().splitlines()
-
 # divide data in groups of 3 lines
 data = [data[i:i+3] for i in range(0, len(data), 3)]
 
