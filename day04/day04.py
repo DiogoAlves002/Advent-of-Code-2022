@@ -1,4 +1,4 @@
-with open('day04/input.txt') as f:
+with open('input.txt') as f:
     data = f.read().splitlines()
 
 
@@ -24,7 +24,7 @@ for l in data:
     if (begin_f <= begin_s and last_f >= last_s) or (begin_f >= begin_s and last_f <= last_s): # challenge 1
         count += 1
 
-    #check if one of them starts or ends in the middle of the other
+    # check if one of them starts or ends in the middle of the other
     if  (begin_f <= begin_s <= last_f or begin_f <= last_s <= last_f) or (begin_s <= begin_f <= last_s or begin_s <= last_f <= last_s): # challenge 2
         count2 += 1
 

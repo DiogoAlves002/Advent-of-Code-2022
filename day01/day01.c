@@ -11,8 +11,9 @@ void updateTop(int *top, int length, int candidate){
         if (candidate > top[i]){
           int prev = top[i];
           top[i] = candidate;
-          updateTop(top, i, prev);
-          break;
+          //updateTop(top, i, prev);
+          //break;
+          candidate = prev; // same as before but not recursively
         }
     }
 }
