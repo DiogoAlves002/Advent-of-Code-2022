@@ -1,22 +1,82 @@
-class cube():
-    def __init__(self, x, y, z, unattached_faces):
-        self.x = x
-        self.y = y
-        self.z = z
-        self.unattached_faces = unattached_faces
+from collections import deque 
 
 
-    def is_attached(self, other_cube):
-        if self.x == other_cube.x and self.y == other_cube.y and (self.z == other_cube.z + 1 or self.z == other_cube.z - 1):
+def get_neighbours(cube):
+    neighbours = set()
+    for coord in range(3): # check each coord + 1 and -1 while the others remain equal
+        side = [0, 0, 0]
+        side[coord] = 1
+
+        neigbour_before, neigbour_after = (), ()
+        for i in range(3):
+            neigbour_before += (cube[i] - side[i],)
+            neigbour_after += (cube[i] + side[i],)
+
+        neighbours.add(neigbour_before)
+        neighbours.add(neigbour_after)
+
+    return neighbours
+
+
+def num_of_faces_unattached(cube, cubes_set):
+    unnatached = 6
+    
+    neigbours = get_neighbours(cube)
+
+    for n in neigbours:
+        if n in cubes_set:
+            unnatached -= 1
+        
+    return unnatached
+
+
+def is_out_of_boundaries(cube, min_boudary, max_boundary):
+    for coord in cube:
+        if coord <= min_boudary or coord >= max_boundary:
             return True
 
-        if self.x == other_cube.x and self.z == other_cube.z and (self.y == other_cube.y + 1 or self.y == other_cube.y - 1):
+    return False
+
+
+
+def is_exterior(side, cubes_set, min_boundary, max_boundary):
+    stack = deque()
+    stack.append(side)
+
+    visited = set()
+
+    while(stack):
+        candidate = stack.pop()
+
+        if candidate in visited:
+            continue
+
+        visited.add(candidate)
+
+        if candidate in cubes_set:
+            continue
+
+        if is_out_of_boundaries(candidate, min_boundary, max_boundary):
             return True
 
-        if self.z == other_cube.z and self.y == other_cube.y and (self.x == other_cube.x + 1 or self.x == other_cube.x - 1):
-            return True
+        neighbours = get_neighbours(candidate)
+        for n in neighbours:
+            stack.appendleft(n)
 
-        return False
+    return False
+
+
+def num_of_exterior_faces(cube, cubes_set, min_boundary, max_boundary):
+    exterior = 0
+    
+    neighbours = get_neighbours(cube)
+
+    for side in neighbours:
+        if is_exterior(side, cubes_set, min_boundary, max_boundary):
+            exterior += 1
+
+    return exterior
+
 
 
 def main():
@@ -27,30 +87,35 @@ def main():
     filename= "test_input.txt" if test_input else "input.txt"
     lines= open(filename, "r").read().splitlines()
 
-    cubes = []
+    cubes_set = set()
+    min_boundary = float("inf")
+    max_boundary = float("-inf")
+
+    
 
     for line in lines:
         x, y, z = line.split(",")
-        c = cube(int(x), int(y), int(z), 6)
-        for other_c in cubes:
-            if c.is_attached(other_c):
-                c.unattached_faces -= 1
-                other_c.unattached_faces -= 1
+        x, y, z = int(x), int(y), int(z)
 
-            if c.unattached_faces == 0:
-                break
-        cubes.append(c)
+        cube = (x, y, z)
+        cubes_set.add(cube)
 
+        max_boundary = max(max_boundary, x, y, z)
+        min_boundary = min(min_boundary, x, y, z)
+        
+    
 
     part_1 = 0
-    for c in cubes:
-        part_1 += c.unattached_faces        
+    part_2 = 0
+    for cube in cubes_set:
+        part_1 += num_of_faces_unattached(cube, cubes_set)
+        part_2 += num_of_exterior_faces(cube, cubes_set, min_boundary, max_boundary)
+
         
-
+    
     print("Challenge 1: ", part_1)
-    #print("Challenge 2: ", part_2)
-
-
+    print("Challenge 2: ", part_2)
+    
 
 
 
